@@ -1,0 +1,311 @@
+// prisma/schema.prisma
+// Database schema for Spandan website
+// Run: npx prisma generate && npx prisma db push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTHENTICATION ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // Hashed with bcrypt
+  name          String
+  role          UserRole  @default(EDITOR)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  auditLogs     AuditLog[]
+  
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN      // Full access - can manage users
+  EDITOR     // Can edit all content
+  VIEWER     // Read-only access
+}
+
+// ==================== EVENTS ====================
+
+model Event {
+  id          String        @id @default(cuid())
+  title       String
+  category    EventCategory
+  date        String        // e.g., "November 2024"
+  month       String        // e.g., "Nov"
+  year        Int
+  summary     String        @db.Text
+  slug        String        @unique
+  published   Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  details     EventDetail?
+  metrics     EventMetric[]
+  
+  @@index([category])
+  @@index([year])
+  @@index([published])
+  @@map("events")
+}
+
+enum EventCategory {
+  BLOOD_DONATION
+  VILLAGE_CAMP
+  HEALTH_CHECKUP
+  DONATION_DRIVE
+  SHORT_EVENT
+}
+
+model EventDetail {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  location    String
+  duration    String
+  
+  // Objective
+  context     String   @db.Text
+  goal        String   @db.Text
+  target      String   @db.Text
+  
+  // Execution
+  preparation String[] // Array of strings
+  process     String[]
+  team        String
+  volunteers  String
+  
+  // Outcome
+  impact      String   @db.Text
+  challenges  String   @db.Text
+  learnings   String   @db.Text
+  
+  // Partners & Documentation
+  partners    String[]
+  photosNote  String   @db.Text
+  dataNote    String   @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  metrics     OutcomeMetric[]
+  
+  @@map("event_details")
+}
+
+model EventMetric {
+  id        String   @id @default(cuid())
+  eventId   String
+  label     String   // e.g., "82 donors"
+  order     Int      // For display ordering
+  
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@map("event_metrics")
+}
+
+model OutcomeMetric {
+  id            String      @id @default(cuid())
+  detailId      String
+  key           String      // e.g., "registrations"
+  value         String      // Can be number or text
+  
+  detail        EventDetail @relation(fields: [detailId], references: [id], onDelete: Cascade)
+  
+  @@map("outcome_metrics")
+}
+
+// ==================== TECH PROJECTS ====================
+
+model TechProject {
+  id          String        @id @default(cuid())
+  title       String
+  status      ProjectStatus
+  year        String
+  problem     String        @db.Text
+  approach    String        @db.Text
+  result      String        @db.Text
+  slug        String        @unique
+  published   Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  constraints ProjectConstraint[]
+  technologies ProjectTechnology[]
+  metrics     ProjectMetric[]
+  
+  @@index([status])
+  @@index([published])
+  @@map("tech_projects")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  IN_DEVELOPMENT
+  COMPLETED
+  ARCHIVED
+}
+
+model ProjectConstraint {
+  id        String      @id @default(cuid())
+  projectId String
+  text      String      @db.Text
+  order     Int
+  
+  project   TechProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("project_constraints")
+}
+
+model ProjectTechnology {
+  id        String      @id @default(cuid())
+  projectId String
+  name      String
+  
+  project   TechProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("project_technologies")
+}
+
+model ProjectMetric {
+  id        String      @id @default(cuid())
+  projectId String
+  key       String
+  value     String
+  
+  project   TechProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("project_metrics")
+}
+
+// ==================== TEAM ====================
+
+model TeamMember {
+  id          String         @id @default(cuid())
+  name        String
+  role        String
+  category    TeamCategory
+  year        String?        // e.g., "B.Tech 3rd Year" (null for faculty)
+  department  String
+  order       Int            // For display ordering
+  published   Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  @@index([category])
+  @@index([published])
+  @@map("team_members")
+}
+
+enum TeamCategory {
+  LEADERSHIP
+  COORDINATION
+  CORE_MEMBER
+  ADVISOR
+}
+
+// ==================== IMPACT DATA ====================
+
+model ImpactYear {
+  id        String   @id @default(cuid())
+  year      Int      @unique
+  
+  // Blood Donation
+  bdCamps          Int
+  bdDonors         Int
+  bdUnits          Int
+  bdHospitals      Int
+  
+  // Village Camps
+  vcCamps          Int
+  vcVillages       Int
+  vcParticipants   Int
+  vcReferrals      Int
+  
+  // Health Checkups
+  hcCamps          Int
+  hcScreenings     Int
+  hcReferrals      Int
+  
+  // Donation Drives
+  ddDrives         Int
+  ddItems          Int
+  ddFamilies       Int
+  
+  // Short Events
+  seEvents         Int
+  seParticipants   Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([year])
+  @@map("impact_years")
+}
+
+model ImpactSummary {
+  id            String   @id @default(cuid())
+  yearsActive   Int
+  totalEvents   Int
+  peopleReached String
+  volunteers    Int
+  updatedAt     DateTime @updatedAt
+  
+  @@map("impact_summary")
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+  
+  @@map("partners")
+}
+
+// ==================== SITE SETTINGS ====================
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  category  String   // e.g., "contact", "social", "content"
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@map("site_settings")
+}
+
+// ==================== AUDIT LOGS ====================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // CREATE, UPDATE, DELETE
+  entity      String   // events, team_members, etc.
+  entityId    String
+  changes     String   @db.Text // JSON string of changes
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
