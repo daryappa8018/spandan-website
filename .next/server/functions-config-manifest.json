@@ -1,0 +1,1 @@
+{"version":1,"functions":{"/api/admin/projects":{},"/api/admin/team/[id]":{},"/api/admin/events":{},"/api/auth/[...nextauth]":{},"/api/admin/events/[id]":{},"/api/admin/team":{},"/admin/events/new":{},"/admin/login":{},"/admin/projects/new":{},"/admin/team/new":{}}}
