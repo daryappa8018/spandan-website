@@ -1,5 +1,10 @@
+'use client';
+
 // components/admin/EventCategoryBadge.tsx
 // Badge component for event categories
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function EventCategoryBadge({ category }: { category: string }) {
   const colors: Record<string, string> = {
@@ -33,11 +38,6 @@ export function EventCategoryBadge({ category }: { category: string }) {
 
 // components/admin/DeleteEventButton.tsx
 // Delete button with confirmation for events
-
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export function DeleteEventButton({
   eventId,
