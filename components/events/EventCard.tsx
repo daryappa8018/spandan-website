@@ -2,10 +2,10 @@
 // Timeline-style event card component
 // Used on events listing page
 
-import { Event } from '@/lib/types';
+import { EventData, EventCategory } from '@/lib/types';
 
 interface EventCardProps {
-  event: Event;
+  event: EventData;
   categoryLabel: string;
 }
 
@@ -61,10 +61,8 @@ export default function EventCard({ event, categoryLabel }: EventCardProps) {
 // components/events/EventList.tsx
 // Container for multiple event cards with category filtering
 
-import { Event, EventCategory } from '@/lib/types';
-
 interface EventListProps {
-  events: Event[];
+  events: EventData[];
   selectedCategory?: EventCategory | 'all';
   onCategoryChange?: (category: EventCategory | 'all') => void;
 }

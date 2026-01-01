@@ -3,9 +3,8 @@
 
 import { requireEditor } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
-import AdminLayout from '@/components/admin/AdminLayout';
-import { EventCategoryBadge } from '@/components/admin/EventCategoryBadge';
-import { DeleteEventButton } from '@/components/admin/DeleteEventButton';
+import AdminLayout from '../AdminLayout';
+import { EventCategoryBadge, DeleteEventButton } from '../EventCategoryBadge';
 
 export default async function AdminEventsPage() {
   await requireEditor();

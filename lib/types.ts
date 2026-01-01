@@ -11,7 +11,7 @@ export type EventCategory =
   | 'donation-drive'
   | 'short-event';
 
-export interface Event {
+export interface EventData {
   id: string;
   title: string;
   category: EventCategory;
@@ -22,7 +22,7 @@ export interface Event {
   metrics: string[]; // e.g., ["82 donors", "82 units"]
 }
 
-export interface EventDetail extends Event {
+export interface EventDetail extends EventData {
   location: string;
   duration: string; // e.g., "9:00 AM - 4:00 PM"
   objective: {

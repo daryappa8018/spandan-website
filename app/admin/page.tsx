@@ -3,7 +3,7 @@
 
 import { requireAuth } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
-import AdminLayout from '@/components/admin/AdminLayout';
+import AdminLayout from './AdminLayout';
 
 export default async function AdminDashboardPage() {
   // Require authentication

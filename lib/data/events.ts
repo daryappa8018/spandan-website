@@ -2,12 +2,12 @@
 // Sample event data for Spandan
 // DATA REPLACEMENT: Replace all entries with real event information
 
-import { Event, EventDetail } from '../types';
+import { EventData, EventDetail } from '../types';
 
 // ==================== EVENT LIST DATA ====================
 // Used on /events page for listing all events
 
-export const events: Event[] = [
+export const events: EventData[] = [
   {
     id: 'winter-clothing-2024',
     title: 'Winter Clothing Drive',
@@ -290,7 +290,7 @@ export const eventDetails: Record<string, EventDetail> = {
 /**
  * Get all events, optionally filtered by category
  */
-export function getEvents(category?: string): Event[] {
+export function getEvents(category?: string): EventData[] {
   if (!category || category === 'all') {
     return events;
   }
@@ -300,7 +300,7 @@ export function getEvents(category?: string): Event[] {
 /**
  * Get a single event by ID
  */
-export function getEventById(id: string): Event | undefined {
+export function getEventById(id: string): EventData | undefined {
   return events.find(event => event.id === id);
 }
 
@@ -314,7 +314,7 @@ export function getEventDetail(id: string): EventDetail | undefined {
 /**
  * Get events by year
  */
-export function getEventsByYear(year: number): Event[] {
+export function getEventsByYear(year: number): EventData[] {
   return events.filter(event => event.year === year);
 }
 
