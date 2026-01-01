@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 // import EventEditForm from '@/components/admin/EventEditForm'; // TODO: Create this component
 
+export const dynamic = 'force-dynamic';
+
 export default async function EditEventPage({
   params,
 }: {

@@ -5,6 +5,8 @@ import { requireAuth } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 import AdminLayout from './AdminLayout';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   // Require authentication
   const user = await requireAuth();
