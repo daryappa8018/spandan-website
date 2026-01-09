@@ -2,28 +2,33 @@
 // Generate sitemap.xml for SEO
 
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://spandan-website.vercel.app';
 
   let events: { slug: string; updatedAt: Date }[] = [];
   let projects: { slug: string; updatedAt: Date }[] = [];
 
   try {
-    // Fetch all published events
-    events = await prisma.event.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    }).catch(() => []);
+    // Only fetch from database in production/runtime, not during build
+    if (process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
+      const { prisma } = await import('@/lib/prisma');
+      
+      events = await prisma.event.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true },
+      }).catch(() => []);
 
-    // Fetch all published projects
-    projects = await prisma.techProject.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    }).catch(() => []);
+      projects = await prisma.techProject.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true },
+      }).catch(() => []);
+    }
   } catch (error) {
-    console.error('Sitemap generation: Database unavailable, using static pages only');
+    console.log('Sitemap: Using static URLs only (database not available during build)');
   }
 
   // Static pages
