@@ -1,112 +1,27 @@
-import React from 'react';
+// app/impact/page.tsx
+// Impact report page - fetches data from database
 
-// IMPACT PAGE - Spandan
-// Report-style with simple numeric facts
-// No animations, no counters flying in
-// Year-wise grouping, clean presentation
+import { prisma } from '@/lib/prisma';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { Metadata } from 'next';
 
-const SpandanImpact = () => {
-  // DATA REPLACEMENT: Replace with real impact data
-  const impactData = {
-    summary: {
-      yearsActive: 2,
-      totalEvents: 28,
-      peopleReached: '2,400+',
-      volunteers: 45
-    },
-    byYear: [
-      {
-        year: 2024,
-        bloodDonation: {
-          camps: 4,
-          donors: 312,
-          unitsCollected: 312,
-          hospitals: 2
-        },
-        villageCamps: {
-          camps: 6,
-          villages: 12,
-          participants: 890,
-          referrals: 34
-        },
-        healthCheckups: {
-          camps: 5,
-          screenings: 654,
-          referrals: 28
-        },
-        donationDrives: {
-          drives: 3,
-          itemsCollected: 1240,
-          familiesBenefited: 420
-        },
-        shortEvents: {
-          events: 4,
-          participants: 280
-        }
-      },
-      {
-        year: 2023,
-        bloodDonation: {
-          camps: 2,
-          donors: 156,
-          unitsCollected: 156,
-          hospitals: 1
-        },
-        villageCamps: {
-          camps: 3,
-          villages: 6,
-          participants: 420,
-          referrals: 18
-        },
-        healthCheckups: {
-          camps: 2,
-          screenings: 298,
-          referrals: 12
-        },
-        donationDrives: {
-          drives: 2,
-          itemsCollected: 680,
-          familiesBenefited: 240
-        },
-        shortEvents: {
-          events: 2,
-          participants: 150
-        }
-      }
-    ],
-    partners: [
-      'District Red Cross Society, Karnal',
-      'Civil Hospital Blood Bank',
-      'Government Primary Schools (8 schools)',
-      'Village Panchayats (18 villages)',
-      'District Health Department'
-    ]
-  };
+export const metadata: Metadata = {
+  title: 'Impact Report | Spandan',
+  description: 'Numerical record of our community work and social impact since 2023.',
+};
+
+export default async function ImpactPage() {
+  // Fetch impact data
+  const [summary, yearlyData, partners] = await Promise.all([
+    prisma.impactSummary.findFirst(),
+    prisma.impactYear.findMany({ orderBy: { year: 'desc' } }),
+    prisma.partner.findMany({ orderBy: { order: 'asc' } }),
+  ]);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Simple Header */}
-      <header className="border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <a href="/" className="block">
-                <h1 className="text-xl font-semibold text-[#3d3e65]">Spandan</h1>
-                <p className="text-xs text-slate-500 mt-0.5">Socio-Technical Club</p>
-              </a>
-            </div>
-            <nav className="flex gap-8 text-sm">
-              <a href="/about" className="text-slate-700 hover:text-[#3d3e65] transition-colors">About</a>
-              <a href="/events" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Events</a>
-              <a href="/donation-drives" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Donation Drives</a>
-              <a href="/tech-projects" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Tech Projects</a>
-              <a href="/impact" className="text-[#3d3e65] font-medium">Impact</a>
-              <a href="/team" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Team</a>
-              <a href="/contact" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Contact</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/impact" />
 
       {/* Page Header */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
@@ -117,44 +32,44 @@ const SpandanImpact = () => {
       </section>
 
       {/* Overall Summary - Simple grid */}
-      <section className="max-w-6xl mx-auto px-6 pb-16">
-        <div className="max-w-4xl">
-          <h2 className="text-xl font-semibold text-slate-900 mb-6">Overall Summary</h2>
-          
-          <div className="grid grid-cols-4 gap-6">
-            <div className="border border-slate-200 p-6">
-              <p className="text-3xl font-semibold text-slate-900 mb-1">
-                {impactData.summary.yearsActive}
-              </p>
-              <p className="text-sm text-slate-600">Years Active</p>
-            </div>
-            <div className="border border-slate-200 p-6">
-              <p className="text-3xl font-semibold text-slate-900 mb-1">
-                {impactData.summary.totalEvents}
-              </p>
-              <p className="text-sm text-slate-600">Total Events</p>
-            </div>
-            <div className="border border-slate-200 p-6">
-              <p className="text-3xl font-semibold text-slate-900 mb-1">
-                {impactData.summary.peopleReached}
-              </p>
-              <p className="text-sm text-slate-600">People Reached</p>
-            </div>
-            <div className="border border-slate-200 p-6">
-              <p className="text-3xl font-semibold text-slate-900 mb-1">
-                {impactData.summary.volunteers}
-              </p>
-              <p className="text-sm text-slate-600">Active Volunteers</p>
+      {summary && (
+        <section className="max-w-6xl mx-auto px-6 pb-16">
+          <div className="max-w-4xl">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Overall Summary</h2>
+            
+            <div className="grid grid-cols-4 gap-6">
+              <div className="border border-slate-200 p-6">
+                <p className="text-3xl font-semibold text-slate-900 mb-1">
+                  {summary.yearsActive}
+                </p>
+                <p className="text-sm text-slate-600">Years Active</p>
+              </div>
+              <div className="border border-slate-200 p-6">
+                <p className="text-3xl font-semibold text-slate-900 mb-1">
+                  {summary.totalEvents}
+                </p>
+                <p className="text-sm text-slate-600">Total Events</p>
+              </div>
+              <div className="border border-slate-200 p-6">
+                <p className="text-3xl font-semibold text-slate-900 mb-1">
+                  {summary.peopleReached}
+                </p>
+                <p className="text-sm text-slate-600">People Reached</p>
+              </div>
+              <div className="border border-slate-200 p-6">
+                <p className="text-3xl font-semibold text-slate-900 mb-1">
+                  {summary.volunteers}
+                </p>
+                <p className="text-sm text-slate-600">Active Volunteers</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* DATA REPLACEMENT: Update summary metrics above */}
-      </section>
+        </section>
+      )}
 
       {/* Year-wise Breakdown */}
-      {impactData.byYear.map((yearData, index) => (
-        <section 
+      {yearlyData.map((yearData, index) => (
+        <section
           key={yearData.year}
           className={`${index > 0 ? 'border-t' : ''} border-slate-200 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} py-16`}
         >
@@ -168,27 +83,19 @@ const SpandanImpact = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-4">Blood Donation Camps</h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.bloodDonation.camps}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.bdCamps}</p>
                       <p className="text-xs text-slate-600">Camps Organized</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.bloodDonation.donors}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.bdDonors}</p>
                       <p className="text-xs text-slate-600">Voluntary Donors</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.bloodDonation.unitsCollected}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.bdUnits}</p>
                       <p className="text-xs text-slate-600">Units Collected</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.bloodDonation.hospitals}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.bdHospitals}</p>
                       <p className="text-xs text-slate-600">Partner Hospitals</p>
                     </div>
                   </div>
@@ -199,27 +106,19 @@ const SpandanImpact = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-4">Village Camps</h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.villageCamps.camps}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.vcCamps}</p>
                       <p className="text-xs text-slate-600">Camps Conducted</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.villageCamps.villages}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.vcVillages}</p>
                       <p className="text-xs text-slate-600">Villages Reached</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.villageCamps.participants}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.vcParticipants}</p>
                       <p className="text-xs text-slate-600">Participants</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.villageCamps.referrals}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.vcReferrals}</p>
                       <p className="text-xs text-slate-600">Medical Referrals</p>
                     </div>
                   </div>
@@ -230,21 +129,15 @@ const SpandanImpact = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-4">Health Checkup Camps</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.healthCheckups.camps}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.hcCamps}</p>
                       <p className="text-xs text-slate-600">Camps Held</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.healthCheckups.screenings}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.hcScreenings}</p>
                       <p className="text-xs text-slate-600">Screenings Done</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.healthCheckups.referrals}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.hcReferrals}</p>
                       <p className="text-xs text-slate-600">Referrals Made</p>
                     </div>
                   </div>
@@ -255,21 +148,15 @@ const SpandanImpact = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-4">Donation Drives</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.donationDrives.drives}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.ddDrives}</p>
                       <p className="text-xs text-slate-600">Drives Organized</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.donationDrives.itemsCollected}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.ddItems}</p>
                       <p className="text-xs text-slate-600">Items Collected</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.donationDrives.familiesBenefited}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.ddFamilies}</p>
                       <p className="text-xs text-slate-600">Families Benefited</p>
                     </div>
                   </div>
@@ -280,15 +167,11 @@ const SpandanImpact = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-4">Short Events</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.shortEvents.events}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.seEvents}</p>
                       <p className="text-xs text-slate-600">Events Held</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">
-                        {yearData.shortEvents.participants}
-                      </p>
+                      <p className="text-2xl font-semibold text-[#3d3e65] mb-1">{yearData.seParticipants}</p>
                       <p className="text-xs text-slate-600">Participants</p>
                     </div>
                   </div>
@@ -299,28 +182,26 @@ const SpandanImpact = () => {
         </section>
       ))}
 
-      {/* DATA REPLACEMENT: Update byYear array with real yearly data */}
-
       {/* Partner Organizations */}
-      <section className="border-t border-slate-200 bg-white py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="max-w-4xl">
-            <h2 className="text-xl font-semibold text-slate-900 mb-6">Partner Organizations</h2>
-            <p className="text-sm text-slate-600 leading-relaxed mb-6">
-              Our work is made possible through collaboration with verified institutions and government bodies.
-            </p>
-            <ul className="space-y-2">
-              {impactData.partners.map((partner, idx) => (
-                <li key={idx} className="text-sm text-slate-700 pl-4 relative before:content-['—'] before:absolute before:left-0">
-                  {partner}
-                </li>
-              ))}
-            </ul>
-
-            {/* DATA REPLACEMENT: Update partners list above */}
+      {partners.length > 0 && (
+        <section className="border-t border-slate-200 bg-white py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="max-w-4xl">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6">Partner Organizations</h2>
+              <p className="text-sm text-slate-600 leading-relaxed mb-6">
+                Our work is made possible through collaboration with verified institutions and government bodies.
+              </p>
+              <ul className="space-y-2">
+                {partners.map((partner) => (
+                  <li key={partner.id} className="text-sm text-slate-700 pl-4 relative before:content-['—'] before:absolute before:left-0">
+                    {partner.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Methodology Note */}
       <section className="border-t border-slate-200 bg-slate-50 py-12">
@@ -351,29 +232,7 @@ const SpandanImpact = () => {
         </div>
       </section>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Spandan</p>
-              <p className="text-xs text-slate-500 mt-1">Socio-Technical Club</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-600">
-                <a href="/contact" className="hover:text-[#3d3e65] transition-colors">Contact</a>
-                {" · "}
-                <a href="/team" className="hover:text-[#3d3e65] transition-colors">Team</a>
-              </p>
-              <p className="text-xs text-slate-500 mt-2">
-                Student initiative • Est. 2023
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-};
-
-export default SpandanImpact;
+}

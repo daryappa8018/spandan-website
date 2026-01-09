@@ -1,32 +1,35 @@
-import React from 'react';
+// app/page.tsx
+// Home page - fetches data from database
 
-// HOME PAGE - Spandan
-// No generic hero section, institutional approach
-// Using standard <a> tags instead of Next.js Link for artifact demo
+import { prisma } from '@/lib/prisma';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { Metadata } from 'next';
 
-const SpandanHome = () => {
+export const metadata: Metadata = {
+  title: 'Spandan - Socio-Technical Club',
+  description: 'Student-run initiative using technology and community organization for social impact through blood donation camps, village outreach, and community service.',
+};
+
+export default async function HomePage() {
+  // Fetch recent events
+  const recentEvents = await prisma.event.findMany({
+    where: { published: true },
+    take: 3,
+    orderBy: { createdAt: 'desc' },
+    include: { metrics: true },
+  });
+
+  // Fetch settings
+  const settings = await prisma.siteSetting.findMany();
+  const settingsMap = settings.reduce((acc, s) => {
+    acc[s.key] = s.value;
+    return acc;
+  }, {} as Record<string, string>);
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Simple Header - Clean, institutional */}
-      <header className="border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-[#3d3e65]">Spandan</h1>
-              <p className="text-xs text-slate-500 mt-0.5">Socio-Technical Club</p>
-            </div>
-            <nav className="flex gap-8 text-sm">
-              <a href="/about" className="text-slate-700 hover:text-[#3d3e65] transition-colors">About</a>
-              <a href="/events" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Events</a>
-              <a href="/donation-drives" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Donation Drives</a>
-              <a href="/tech-projects" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Tech Projects</a>
-              <a href="/impact" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Impact</a>
-              <a href="/team" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Team</a>
-              <a href="/contact" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Contact</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/" />
 
       {/* Institutional Introduction - Left-aligned, calm */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-12">
@@ -37,8 +40,6 @@ const SpandanHome = () => {
           <p className="text-base text-slate-700 leading-relaxed">
             We conduct blood donation camps, village outreach programs, health checkups, and non-monetary donation drives. Our work is guided by strict ethical principles, including a firm policy against accepting any form of monetary donations.
           </p>
-          
-          {/* DATA REPLACEMENT: Update introduction text here */}
         </div>
       </section>
 
@@ -85,44 +86,24 @@ const SpandanHome = () => {
               </p>
             </div>
           </div>
-
-          {/* DATA REPLACEMENT: Update activity descriptions in the grid above */}
         </div>
       </section>
 
-      {/* Recent Activities - Timeline style, not cards */}
+      {/* Recent Activities - Timeline style, from database */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <h2 className="text-xl font-semibold text-slate-900 mb-8">Recent Activities</h2>
         
         <div className="space-y-8 max-w-3xl">
-          <div className="border-l-2 border-slate-200 pl-6">
-            <p className="text-xs text-slate-500 mb-1">December 2024</p>
-            <h3 className="text-base font-semibold text-slate-900 mb-2">Winter Clothing Drive</h3>
-            <p className="text-sm text-slate-600 leading-relaxed mb-2">
-              Collected and distributed 340 warm clothing items to residents of Gharaunda and nearby villages ahead of winter season.
-            </p>
-            <a href="/events/winter-clothing-2024" className="text-sm text-[#3d3e65] underline hover:text-slate-900">View details</a>
-          </div>
-
-          <div className="border-l-2 border-slate-200 pl-6">
-            <p className="text-xs text-slate-500 mb-1">November 2024</p>
-            <h3 className="text-base font-semibold text-slate-900 mb-2">Blood Donation Camp - Campus</h3>
-            <p className="text-sm text-slate-600 leading-relaxed mb-2">
-              82 students and faculty members donated blood in collaboration with District Red Cross Society. All units dispatched to Civil Hospital blood bank.
-            </p>
-            <a href="/events/blood-camp-nov-2024" className="text-sm text-[#3d3e65] underline hover:text-slate-900">View details</a>
-          </div>
-
-          <div className="border-l-2 border-slate-200 pl-6">
-            <p className="text-xs text-slate-500 mb-1">October 2024</p>
-            <h3 className="text-base font-semibold text-slate-900 mb-2">Village Health Camp - Baraut</h3>
-            <p className="text-sm text-slate-600 leading-relaxed mb-2">
-              Conducted basic health screenings for 156 residents. Identified 12 cases requiring follow-up medical attention and provided referrals.
-            </p>
-            <a href="/events/village-camp-baraut-2024" className="text-sm text-[#3d3e65] underline hover:text-slate-900">View details</a>
-          </div>
-
-          {/* DATA REPLACEMENT: Replace activities above with real event data */}
+          {recentEvents.map((event) => (
+            <div key={event.id} className="border-l-2 border-slate-200 pl-6">
+              <p className="text-xs text-slate-500 mb-1">{event.date}</p>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">{event.title}</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-2">
+                {event.summary}
+              </p>
+              <a href={`/events/${event.slug}`} className="text-sm text-[#3d3e65] underline hover:text-slate-900">View details</a>
+            </div>
+          ))}
         </div>
 
         <div className="mt-10">
@@ -153,36 +134,11 @@ const SpandanHome = () => {
                 Read our complete donation policy
               </a>
             </div>
-
-            {/* DATA REPLACEMENT: Update ethical framework text if needed */}
           </div>
         </div>
       </section>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Spandan</p>
-              <p className="text-xs text-slate-500 mt-1">Socio-Technical Club</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-600">
-                <a href="/contact" className="hover:text-[#3d3e65] transition-colors">Contact</a>
-                {" · "}
-                <a href="/team" className="hover:text-[#3d3e65] transition-colors">Team</a>
-              </p>
-              <p className="text-xs text-slate-500 mt-2">
-                {/* DATA REPLACEMENT: Add institution name below */}
-                Student initiative • Est. 2023
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-};
-
-export default SpandanHome;
+}
