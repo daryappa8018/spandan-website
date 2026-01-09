@@ -7,19 +7,27 @@ import Footer from '@/components/layout/Footer';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
+// Make this a dynamic route - don't prerender at build time
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate every hour
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const event = await prisma.event.findUnique({
-    where: { slug: params.slug },
-  });
+  try {
+    const event = await prisma.event.findUnique({
+      where: { slug: params.slug },
+    }).catch(() => null);
 
-  if (!event) {
-    return { title: 'Event Not Found' };
+    if (!event) {
+      return { title: 'Event Not Found | Spandan' };
+    }
+
+    return {
+      title: `${event.title} | Spandan`,
+      description: event.summary,
+    };
+  } catch (error) {
+    return { title: 'Event | Spandan' };
   }
-
-  return {
-    title: `${event.title} | Spandan`,
-    description: event.summary,
-  };
 }
 
 const categoryLabels: Record<string, string> = {
