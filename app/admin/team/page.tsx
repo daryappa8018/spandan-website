@@ -3,8 +3,8 @@
 
 import { requireEditor } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
-import AdminLayout from '../AdminLayout';
-import { DeleteTeamMemberButton } from '../EventCategoryBadge';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { DeleteTeamMemberButton } from '@/components/admin/DeleteTeamMemberButton';
 
 export const dynamic = 'force-dynamic';
 

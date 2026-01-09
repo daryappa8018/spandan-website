@@ -3,7 +3,7 @@
 
 import { requireAuth } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
-import AdminLayout from './AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,28 +11,48 @@ export default async function AdminDashboardPage() {
   // Require authentication
   const user = await requireAuth();
 
-  // Fetch dashboard statistics
-  const [
-    totalEvents,
-    totalProjects,
-    totalTeamMembers,
-    recentEvents,
-    recentAuditLogs,
-  ] = await Promise.all([
-    prisma.event.count(),
-    prisma.techProject.count(),
-    prisma.teamMember.count(),
-    prisma.event.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, category: true, createdAt: true },
-    }),
-    prisma.auditLog.findMany({
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-      include: { user: { select: { name: true, email: true } } },
-    }),
-  ]);
+  // Fetch dashboard statistics with error handling
+  let stats = {
+    totalEvents: 0,
+    totalProjects: 0,
+    totalTeamMembers: 0,
+    recentEvents: [],
+    recentAuditLogs: [],
+  };
+
+  try {
+    const [
+      totalEvents,
+      totalProjects,
+      totalTeamMembers,
+      recentEvents,
+      recentAuditLogs,
+    ] = await Promise.all([
+      prisma.event.count().catch(() => 0),
+      prisma.techProject.count().catch(() => 0),
+      prisma.teamMember.count().catch(() => 0),
+      prisma.event.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, title: true, category: true, createdAt: true },
+      }).catch(() => []),
+      prisma.auditLog.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      }).catch(() => []),
+    ]);
+
+    stats = {
+      totalEvents,
+      totalProjects,
+      totalTeamMembers,
+      recentEvents,
+      recentAuditLogs,
+    };
+  } catch (error) {
+    console.error('Dashboard data fetch error:', error);
+  }
 
   return (
     <AdminLayout>
@@ -54,7 +74,7 @@ export default async function AdminDashboardPage() {
               <div>
                 <p className="text-sm text-slate-600 mb-1">Total Events</p>
                 <p className="text-3xl font-semibold text-slate-900">
-                  {totalEvents}
+                  {stats.totalEvents}
                 </p>
               </div>
               <div className="text-4xl">📅</div>
@@ -72,7 +92,7 @@ export default async function AdminDashboardPage() {
               <div>
                 <p className="text-sm text-slate-600 mb-1">Tech Projects</p>
                 <p className="text-3xl font-semibold text-slate-900">
-                  {totalProjects}
+                  {stats.totalProjects}
                 </p>
               </div>
               <div className="text-4xl">💻</div>
@@ -90,7 +110,7 @@ export default async function AdminDashboardPage() {
               <div>
                 <p className="text-sm text-slate-600 mb-1">Team Members</p>
                 <p className="text-3xl font-semibold text-slate-900">
-                  {totalTeamMembers}
+                  {stats.totalTeamMembers}
                 </p>
               </div>
               <div className="text-4xl">👥</div>
@@ -110,11 +130,11 @@ export default async function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               Recent Events
             </h2>
-            {recentEvents.length === 0 ? (
+            {stats.recentEvents.length === 0 ? (
               <p className="text-sm text-slate-500">No events yet</p>
             ) : (
               <div className="space-y-3">
-                {recentEvents.map((event) => (
+                {stats.recentEvents.map((event) => (
                   <div
                     key={event.id}
                     className="flex items-start justify-between border-b border-slate-100 pb-3 last:border-0"
@@ -150,11 +170,11 @@ export default async function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               Recent Activity
             </h2>
-            {recentAuditLogs.length === 0 ? (
+            {stats.recentAuditLogs.length === 0 ? (
               <p className="text-sm text-slate-500">No recent activity</p>
             ) : (
               <div className="space-y-3">
-                {recentAuditLogs.map((log) => (
+                {stats.recentAuditLogs.map((log) => (
                   <div
                     key={log.id}
                     className="border-b border-slate-100 pb-3 last:border-0"

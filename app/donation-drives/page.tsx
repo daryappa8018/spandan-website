@@ -1,34 +1,19 @@
-import React from 'react';
+// app/donation-drives/page.tsx
+// Donation drives policy page - CRITICAL PAGE about no monetary donations
 
-// DONATION DRIVES PAGE - Spandan
-// CRITICAL PAGE: Must prevent confusion about monetary donations
-// Clear, firm, transparent language about what we accept and don't accept
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { Metadata } from 'next';
 
-const SpandanDonationDrives = () => {
+export const metadata: Metadata = {
+  title: 'Donation Drives | Spandan',
+  description: 'Learn about our donation policy. We accept material donations only - no monetary contributions.',
+};
+
+export default function DonationDrivesPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Simple Header */}
-      <header className="border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <a href="/" className="block">
-                <h1 className="text-xl font-semibold text-[#3d3e65]">Spandan</h1>
-                <p className="text-xs text-slate-500 mt-0.5">Socio-Technical Club</p>
-              </a>
-            </div>
-            <nav className="flex gap-8 text-sm">
-              <a href="/about" className="text-slate-700 hover:text-[#3d3e65] transition-colors">About</a>
-              <a href="/events" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Events</a>
-              <a href="/donation-drives" className="text-[#3d3e65] font-medium">Donation Drives</a>
-              <a href="/tech-projects" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Tech Projects</a>
-              <a href="/impact" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Impact</a>
-              <a href="/team" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Team</a>
-              <a href="/contact" className="text-slate-700 hover:text-[#3d3e65] transition-colors">Contact</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/donation-drives" />
 
       {/* Page Header */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
@@ -129,8 +114,6 @@ const SpandanDonationDrives = () => {
               </ul>
             </div>
           </div>
-
-          {/* DATA REPLACEMENT: Update accepted items list above */}
         </div>
       </section>
 
@@ -183,8 +166,6 @@ const SpandanDonationDrives = () => {
                 </ul>
               </div>
             </div>
-
-            {/* DATA REPLACEMENT: Update rejected items list above */}
           </div>
         </div>
       </section>
@@ -256,8 +237,6 @@ const SpandanDonationDrives = () => {
               </p>
             </div>
           </div>
-
-          {/* DATA REPLACEMENT: Update logistics process above */}
         </div>
       </section>
 
@@ -281,8 +260,6 @@ const SpandanDonationDrives = () => {
                 We're a student organization operating on volunteer time. Our strength is coordination and execution, not financial administration. By focusing exclusively on material donations, we maintain simplicity, accountability, and trust.
               </p>
             </div>
-
-            {/* DATA REPLACEMENT: Update explanation if needed */}
           </div>
         </div>
       </section>
@@ -313,29 +290,7 @@ const SpandanDonationDrives = () => {
         </div>
       </section>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Spandan</p>
-              <p className="text-xs text-slate-500 mt-1">Socio-Technical Club</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-600">
-                <a href="/contact" className="hover:text-[#3d3e65] transition-colors">Contact</a>
-                {" · "}
-                <a href="/team" className="hover:text-[#3d3e65] transition-colors">Team</a>
-              </p>
-              <p className="text-xs text-slate-500 mt-2">
-                Student initiative • Est. 2023
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-};
-
-export default SpandanDonationDrives;
+}

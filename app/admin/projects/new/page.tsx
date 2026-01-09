@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminLayout from '../../AdminLayout';
-import { FormField } from '../../EventCategoryBadge';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { FormField } from '@/components/admin/FormField';
 
 export default function NewProjectPage() {
   const router = useRouter();
