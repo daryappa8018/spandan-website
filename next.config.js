@@ -5,17 +5,16 @@
 const nextConfig = {
   reactStrictMode: true,
   
+  // Disable static generation for API routes and dynamic pages during build
+  experimental: {
+    isrMemoryCacheSize: 0,
+  },
+  
   // Image optimization configuration
   images: {
     formats: ['image/avif', 'image/webp'],
     // Add domains if loading external images
     // domains: ['example.com'],
-  },
-  
-  // Experimental features (optional)
-  experimental: {
-    // Enable if needed
-    // typedRoutes: true,
   },
   
   // Environment variables that should be available on the client side
