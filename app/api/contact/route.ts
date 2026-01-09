@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 // For email sending, you can use Resend, SendGrid, or Nodemailer
 // This example uses basic email validation and logging to database
 

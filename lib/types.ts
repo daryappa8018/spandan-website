@@ -5,11 +5,11 @@
 // ==================== EVENT TYPES ====================
 
 export type EventCategory = 
-  | 'blood-donation'
-  | 'village-camp'
-  | 'health-checkup'
-  | 'donation-drive'
-  | 'short-event';
+  | 'BLOOD_DONATION'
+  | 'VILLAGE_CAMP'
+  | 'HEALTH_CHECKUP'
+  | 'DONATION_DRIVE'
+  | 'SHORT_EVENT';
 
 export interface EventData {
   id: string;
@@ -19,6 +19,7 @@ export interface EventData {
   month: string; // e.g., "Nov"
   year: number;
   summary: string;
+  slug?: string; // URL-friendly identifier for event detail pages
   metrics: string[]; // e.g., ["82 donors", "82 units"]
 }
 
@@ -51,7 +52,7 @@ export interface EventDetail extends EventData {
 
 // ==================== TECH PROJECT TYPES ====================
 
-export type ProjectStatus = 'Active' | 'In Development' | 'Completed' | 'Archived';
+export type ProjectStatus = 'ACTIVE' | 'IN_DEVELOPMENT' | 'COMPLETED' | 'ARCHIVED';
 
 export interface TechProject {
   id: string;

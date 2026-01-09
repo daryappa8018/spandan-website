@@ -94,6 +94,7 @@ export default async function EventsPage({
                     month: event.month,
                     year: event.year,
                     summary: event.summary,
+                    slug: event.slug,
                     metrics: event.metrics.map((m) => m.label),
                   }}
                   categoryLabel={getCategoryLabel(event.category)}

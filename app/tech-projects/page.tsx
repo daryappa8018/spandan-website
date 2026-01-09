@@ -8,7 +8,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Tech Projects | Spandan',
-  description: 'Technical tools and systems we've built to support our community work.',
+  description: 'Technical tools and systems we\'ve built to support our community work.',
 };
 
 export default async function TechProjectsPage() {

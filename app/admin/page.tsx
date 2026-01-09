@@ -3,7 +3,7 @@
 
 import { requireAuth } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
-import AdminLayout from './AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export const dynamic = 'force-dynamic';
 

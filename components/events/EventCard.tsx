@@ -46,7 +46,7 @@ export default function EventCard({ event, categoryLabel }: EventCardProps) {
         </div>
 
         <a
-          href={`/events/${event.id}`}
+          href={`/events/${event.slug || event.id}`}
           className="text-sm text-[#3d3e65] underline hover:text-slate-900 transition-colors"
         >
           View full details →
