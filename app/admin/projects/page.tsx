@@ -4,7 +4,7 @@
 import { requireEditor } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { DeleteProjectButton } from '../EventCategoryBadge';
+import { DeleteProjectButton } from '@/components/admin';
 
 export const dynamic = 'force-dynamic';
 

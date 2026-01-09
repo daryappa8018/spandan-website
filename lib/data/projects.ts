@@ -10,7 +10,7 @@ export const projects: TechProject[] = [
   {
     id: 'blood-donor-database',
     title: 'Blood Donor Database System',
-    status: 'Active',
+    status: 'ACTIVE',
     year: '2024',
     problem: 'Blood banks issue urgent requests for specific blood groups, but manually searching through scattered donor lists is time-consuming. Response time matters in emergencies.',
     constraints: [
@@ -32,7 +32,7 @@ export const projects: TechProject[] = [
   {
     id: 'health-camp-analytics',
     title: 'Health Camp Data Analysis Pipeline',
-    status: 'Active',
+    status: 'ACTIVE',
     year: '2023-2024',
     problem: 'Village health camps generate screening data (BP, diabetes, BMI) but without analysis, we can\'t identify patterns or improve targeting for future camps.',
     constraints: [
@@ -54,7 +54,7 @@ export const projects: TechProject[] = [
   {
     id: 'donation-inventory',
     title: 'Donation Inventory Tracker',
-    status: 'Active',
+    status: 'ACTIVE',
     year: '2024',
     problem: 'During donation drives, tracking hundreds of items manually leads to errors. Need to know what we have, where it came from, and ensure fair distribution.',
     constraints: [
@@ -76,7 +76,7 @@ export const projects: TechProject[] = [
   {
     id: 'event-coordination',
     title: 'Internal Event Coordination Dashboard',
-    status: 'Active',
+    status: 'ACTIVE',
     year: '2023-2024',
     problem: 'Event details scattered across WhatsApp messages, email threads, and handwritten notes. New volunteers struggle to understand their responsibilities.',
     constraints: [
@@ -98,7 +98,7 @@ export const projects: TechProject[] = [
   {
     id: 'village-mapping',
     title: 'Village Outreach Mapping Tool',
-    status: 'In Development',
+    status: 'IN_DEVELOPMENT',
     year: '2024',
     problem: 'No systematic way to track which villages we\'ve visited, what services were provided, or when follow-up visits are due. Makes planning inefficient.',
     constraints: [
@@ -111,7 +111,7 @@ export const projects: TechProject[] = [
     tech: ['React', 'Leaflet.js', 'OpenStreetMap', 'IndexedDB'],
     result: 'Currently in testing phase. Prototype tracks 12 villages with visit history. Plan to deploy before next village camp season (March 2025).',
     metrics: {
-      status: 'Beta',
+      status: 'BETA',
       villagesMapped: 12,
       plannedRelease: 'Mar 2025'
     }
@@ -120,7 +120,7 @@ export const projects: TechProject[] = [
   {
     id: 'sms-notification',
     title: 'SMS Notification System for Village Camps',
-    status: 'Active',
+    status: 'ACTIVE',
     year: '2023',
     problem: 'Village residents often miss camp announcements due to limited smartphone usage and internet access. Traditional methods like posters have limited reach.',
     constraints: [
@@ -163,7 +163,7 @@ export function getProjectById(id: string): TechProject | undefined {
  * Get active projects
  */
 export function getActiveProjects(): TechProject[] {
-  return projects.filter(project => project.status === 'Active');
+  return projects.filter(project => project.status === 'ACTIVE');
 }
 
 /**

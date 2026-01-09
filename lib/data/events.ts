@@ -11,7 +11,7 @@ export const events: EventData[] = [
   {
     id: 'winter-clothing-2024',
     title: 'Winter Clothing Drive',
-    category: 'donation-drive',
+    category: 'DONATION_DRIVE',
     date: 'December 2024',
     month: 'Dec',
     year: 2024,
@@ -21,7 +21,7 @@ export const events: EventData[] = [
   {
     id: 'blood-camp-nov-2024',
     title: 'Blood Donation Camp - Campus',
-    category: 'blood-donation',
+    category: 'BLOOD_DONATION',
     date: 'November 2024',
     month: 'Nov',
     year: 2024,
@@ -31,7 +31,7 @@ export const events: EventData[] = [
   {
     id: 'village-camp-baraut-2024',
     title: 'Village Health Camp - Baraut',
-    category: 'village-camp',
+    category: 'VILLAGE_CAMP',
     date: 'October 2024',
     month: 'Oct',
     year: 2024,
@@ -41,7 +41,7 @@ export const events: EventData[] = [
   {
     id: 'raksha-bandhan-2024',
     title: 'Raksha Bandhan - Village Visit',
-    category: 'short-event',
+    category: 'SHORT_EVENT',
     date: 'August 2024',
     month: 'Aug',
     year: 2024,
@@ -51,7 +51,7 @@ export const events: EventData[] = [
   {
     id: 'blood-camp-aug-2024',
     title: 'Blood Donation Camp - Emergency Drive',
-    category: 'blood-donation',
+    category: 'BLOOD_DONATION',
     date: 'August 2024',
     month: 'Aug',
     year: 2024,
@@ -61,7 +61,7 @@ export const events: EventData[] = [
   {
     id: 'health-camp-jhajjar-2024',
     title: 'Health Checkup Camp - Jhajjar District',
-    category: 'health-checkup',
+    category: 'HEALTH_CHECKUP',
     date: 'July 2024',
     month: 'Jul',
     year: 2024,
@@ -71,7 +71,7 @@ export const events: EventData[] = [
   {
     id: 'book-donation-2024',
     title: 'Educational Material Drive',
-    category: 'donation-drive',
+    category: 'DONATION_DRIVE',
     date: 'June 2024',
     month: 'Jun',
     year: 2024,
@@ -81,7 +81,7 @@ export const events: EventData[] = [
   {
     id: 'village-camp-panipat-2024',
     title: 'Village Camp - Panipat Rural',
-    category: 'village-camp',
+    category: 'VILLAGE_CAMP',
     date: 'May 2024',
     month: 'May',
     year: 2024,
@@ -98,7 +98,7 @@ export const eventDetails: Record<string, EventDetail> = {
   'blood-camp-nov-2024': {
     id: 'blood-camp-nov-2024',
     title: 'Blood Donation Camp - Campus',
-    category: 'blood-donation',
+    category: 'BLOOD_DONATION',
     date: 'November 15, 2024',
     month: 'Nov',
     year: 2024,
@@ -160,7 +160,7 @@ export const eventDetails: Record<string, EventDetail> = {
   'village-camp-baraut-2024': {
     id: 'village-camp-baraut-2024',
     title: 'Village Health Camp - Baraut',
-    category: 'village-camp',
+    category: 'VILLAGE_CAMP',
     date: 'October 12-13, 2024',
     month: 'Oct',
     year: 2024,
@@ -224,7 +224,7 @@ export const eventDetails: Record<string, EventDetail> = {
   'winter-clothing-2024': {
     id: 'winter-clothing-2024',
     title: 'Winter Clothing Drive',
-    category: 'donation-drive',
+    category: 'DONATION_DRIVE',
     date: 'December 5-12, 2024',
     month: 'Dec',
     year: 2024,
