@@ -52,8 +52,9 @@ async function main() {
   console.log('✅ Impact summary initialized');
 
   // Create sample site settings
+  const contactEmail = process.env.CONTACT_EMAIL || process.env.ADMIN_EMAIL || 'spandan@coeptech.ac.in';
   const settings = [
-    { key: 'site_email', value: 'spandan@college.edu', category: 'contact' },
+    { key: 'site_email', value: contactEmail, category: 'contact' },
     { key: 'site_phone', value: '+91 98765 43210', category: 'contact' },
     { key: 'site_location', value: 'College Campus, Karnal, Haryana', category: 'contact' },
     { key: 'instagram_handle', value: '@spandan_club', category: 'social' },
