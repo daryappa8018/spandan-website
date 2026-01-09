@@ -2,6 +2,12 @@
 // Database seed script - creates initial admin user and sample data
 // Run: npm run db:seed
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables from .env.local
+config({ path: resolve(process.cwd(), '.env.local') });
+
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -9,6 +15,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Starting database seed...');
+  console.log('📧 Using admin email:', process.env.ADMIN_EMAIL);
 
   // Create admin user
   // ⚠️ SECURITY WARNING: Change these credentials immediately after first setup!
