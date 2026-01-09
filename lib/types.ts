@@ -161,6 +161,7 @@ export const mainNavigation: NavItem[] = [
   { label: 'Events', href: '/events' },
   { label: 'Donation Drives', href: '/donation-drives' },
   { label: 'Tech Projects', href: '/tech-projects' },
+  { label: 'Gallery', href: '/gallery' },
   { label: 'Impact', href: '/impact' },
   { label: 'Team', href: '/team' },
   { label: 'Contact', href: '/contact' },
