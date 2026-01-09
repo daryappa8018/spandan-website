@@ -11,8 +11,10 @@ async function main() {
   console.log('🌱 Starting database seed...');
 
   // Create admin user
+  // ⚠️ SECURITY WARNING: Change these credentials immediately after first setup!
+  // Set custom values via environment variables: ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@spandan.edu';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123'; // TODO: CHANGE THIS!
   const adminName = process.env.ADMIN_NAME || 'Admin User';
 
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
