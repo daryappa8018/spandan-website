@@ -3,8 +3,6 @@
 
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { signIn } from 'next-auth/react';
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';

@@ -13,10 +13,11 @@ export async function GET() {
   try {
     const years = await prisma.impactYear.findMany({
       orderBy: { year: 'desc' },
-    });
+    }).catch(() => []);
     return NextResponse.json(years);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch years' }, { status: 500 });
+    console.error('Impact years fetch error:', error);
+    return NextResponse.json([]);
   }
 }
 
@@ -36,6 +37,9 @@ export async function PUT(request: NextRequest) {
       where: { year },
       update: data,
       create: { year, ...data },
+    }).catch((error) => {
+      console.error('Database upsert error:', error);
+      throw error;
     });
 
     await prisma.auditLog.create({
@@ -46,10 +50,14 @@ export async function PUT(request: NextRequest) {
         entityId: String(year),
         changes: JSON.stringify(body),
       },
+    }).catch((error) => {
+      console.error('Audit log error:', error);
+      // Don't fail the request if audit log fails
     });
 
     return NextResponse.json(yearData);
   } catch (error: any) {
+    console.error('Impact year update error:', error);
     return NextResponse.json({ error: 'Failed to update year data' }, { status: 500 });
   }
 }
