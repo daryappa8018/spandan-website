@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import EventCard from '@/components/events/EventCard';
 import { Metadata } from 'next';
+import { EventCategory } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: 'Events | Spandan',
@@ -28,12 +29,15 @@ export default async function EventsPage({
 }) {
   const selectedCategory = searchParams.category || 'all';
 
+  // Build where clause with proper typing
+  const whereClause: any = { published: true };
+  if (selectedCategory !== 'all' && selectedCategory in EventCategory) {
+    whereClause.category = selectedCategory as EventCategory;
+  }
+
   // Fetch events from database
   const events = await prisma.event.findMany({
-    where: {
-      published: true,
-      ...(selectedCategory !== 'all' && { category: selectedCategory }),
-    },
+    where: whereClause,
     orderBy: [{ year: 'desc' }, { createdAt: 'desc' }],
     include: { metrics: { orderBy: { order: 'asc' } } },
   });
