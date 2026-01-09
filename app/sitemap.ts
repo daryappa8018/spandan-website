@@ -7,17 +7,24 @@ import { prisma } from '@/lib/prisma';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-  // Fetch all published events
-  const events = await prisma.event.findMany({
-    where: { published: true },
-    select: { slug: true, updatedAt: true },
-  });
+  let events: { slug: string; updatedAt: Date }[] = [];
+  let projects: { slug: string; updatedAt: Date }[] = [];
 
-  // Fetch all published projects
-  const projects = await prisma.techProject.findMany({
-    where: { published: true },
-    select: { slug: true, updatedAt: true },
-  });
+  try {
+    // Fetch all published events
+    events = await prisma.event.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    }).catch(() => []);
+
+    // Fetch all published projects
+    projects = await prisma.techProject.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    }).catch(() => []);
+  } catch (error) {
+    console.error('Sitemap generation: Database unavailable, using static pages only');
+  }
 
   // Static pages
   const staticPages = [
