@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import PageHeader from '@/components/ui/PageHeader';
+import { PageHeader } from '@/components/ui/PageHeader';
 import GalleryGrid from '@/components/gallery/GalleryGrid';
 import GalleryFilters, { FilterOptions } from '@/components/gallery/GalleryFilters';
 
