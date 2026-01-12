@@ -13,8 +13,15 @@ const nextConfig = {
   // Image optimization configuration
   images: {
     formats: ['image/avif', 'image/webp'],
-    // Add domains if loading external images
-    // domains: ['example.com'],
+    // Google Drive image hosting
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+        pathname: '/**',
+      },
+    ],
+    // Alternative: use unoptimized: true for Drive images if needed
   },
   
   // Environment variables that should be available on the client side

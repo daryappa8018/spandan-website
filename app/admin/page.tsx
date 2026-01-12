@@ -229,12 +229,6 @@ export default async function AdminDashboardPage() {
               + New Project
             </a>
             <a
-              href="/admin/gallery"
-              className="text-sm text-[#3d3e65] hover:underline"
-            >
-              📸 Photo Gallery
-            </a>
-            <a
               href="/admin/settings"
               className="text-sm text-[#3d3e65] hover:underline"
             >

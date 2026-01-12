@@ -1,56 +1,115 @@
 // app/api/admin/gallery/[id]/route.ts
-// Gallery management API - Update and delete individual photos
+// Admin API for managing individual gallery photos
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isValidDriveUrl } from '@/lib/google-drive';
 
 export const dynamic = 'force-dynamic';
 
-// PATCH /api/admin/gallery/[id] - Update photo
-export async function PATCH(
+// GET single photo
+export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!session || !session.user) {
+    const photo = await prisma.galleryPhoto.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!photo) {
+      return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ photo }, { status: 200 });
+  } catch (error: any) {
+    console.error('Photo fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch photo' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update photo
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { id } = params;
+    const {
+      driveImageUrl,
+      category,
+      referenceId,
+      referenceName,
+      year,
+      caption,
+      published,
+      order,
+    } = body;
+
+    // Fetch existing photo
+    const existingPhoto = await prisma.galleryPhoto.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingPhoto) {
+      return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
+    }
+
+    // Validate Google Drive URL if changed
+    if (driveImageUrl && driveImageUrl !== existingPhoto.driveImageUrl) {
+      if (!isValidDriveUrl(driveImageUrl)) {
+        return NextResponse.json(
+          { error: 'Invalid Google Drive URL' },
+          { status: 400 }
+        );
+      }
+    }
 
     // Update photo
+    const updateData: any = {};
+    if (driveImageUrl !== undefined) updateData.driveImageUrl = driveImageUrl;
+    if (category !== undefined) updateData.category = category;
+    if (referenceId !== undefined) updateData.referenceId = referenceId || null;
+    if (referenceName !== undefined) updateData.referenceName = referenceName || null;
+    if (year !== undefined) updateData.year = parseInt(year);
+    if (caption !== undefined) updateData.caption = caption || null;
+    if (published !== undefined) updateData.published = published;
+    if (order !== undefined) updateData.order = order;
+
     const photo = await prisma.galleryPhoto.update({
-      where: { id },
+      where: { id: params.id },
+      data: updateData,
+    });
+
+    // Log audit
+    await prisma.auditLog.create({
       data: {
-        ...(body.title !== undefined && { title: body.title }),
-        ...(body.googleDriveId !== undefined && { googleDriveId: body.googleDriveId }),
-        ...(body.googleDriveUrl !== undefined && { googleDriveUrl: body.googleDriveUrl }),
-        ...(body.thumbnailUrl !== undefined && { thumbnailUrl: body.thumbnailUrl }),
-        ...(body.eventId !== undefined && { eventId: body.eventId || null }),
-        ...(body.category !== undefined && { category: body.category }),
-        ...(body.photoDate !== undefined && {
-          photoDate: body.photoDate ? new Date(body.photoDate) : null,
-        }),
-        ...(body.published !== undefined && { published: body.published }),
-        ...(body.order !== undefined && { order: body.order }),
-      },
-      include: {
-        event: {
-          select: {
-            title: true,
-          },
-        },
+        userId: session.user.id,
+        action: 'UPDATE',
+        entity: 'gallery_photos',
+        entityId: photo.id,
+        changes: JSON.stringify({ before: existingPhoto, after: photo }),
       },
     });
 
-    return NextResponse.json({ photo });
+    return NextResponse.json({ photo }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating photo:', error);
+    console.error('Photo update error:', error);
     return NextResponse.json(
       { error: 'Failed to update photo' },
       { status: 500 }
@@ -58,28 +117,46 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/admin/gallery/[id] - Delete photo
+// DELETE photo
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
-
-    // Delete photo (note: this doesn't delete from Google Drive)
-    await prisma.galleryPhoto.delete({
-      where: { id },
+    const photo = await prisma.galleryPhoto.findUnique({
+      where: { id: params.id },
     });
 
-    return NextResponse.json({ success: true });
+    if (!photo) {
+      return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
+    }
+
+    await prisma.galleryPhoto.delete({
+      where: { id: params.id },
+    });
+
+    // Log audit
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: 'DELETE',
+        entity: 'gallery_photos',
+        entityId: params.id,
+        changes: JSON.stringify({ deleted: photo }),
+      },
+    });
+
+    return NextResponse.json(
+      { message: 'Photo deleted successfully' },
+      { status: 200 }
+    );
   } catch (error: any) {
-    console.error('Error deleting photo:', error);
+    console.error('Photo deletion error:', error);
     return NextResponse.json(
       { error: 'Failed to delete photo' },
       { status: 500 }

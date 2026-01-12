@@ -53,7 +53,6 @@ model Event {
   // Relations
   details     EventDetail?
   metrics     EventMetric[]
-  photos      GalleryPhoto[]
   
   @@index([category])
   @@index([year])
@@ -277,6 +276,37 @@ model Partner {
   @@map("partners")
 }
 
+// ==================== PHOTOS / GALLERY ====================
+
+model GalleryPhoto {
+  id                String        @id @default(cuid())
+  driveImageUrl     String        // Original Google Drive share link
+  category          PhotoCategory
+  referenceId       String?       // eventId / teamMemberId / projectId (nullable for general photos)
+  referenceName     String?       // Event/Team/Project name for easier filtering
+  year              Int
+  caption           String?       @db.Text
+  published         Boolean       @default(true)
+  order             Int           @default(0) // For manual ordering within a category
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([category])
+  @@index([referenceId])
+  @@index([year])
+  @@index([published])
+  @@map("gallery_photos")
+}
+
+enum PhotoCategory {
+  EVENT
+  TEAM
+  PROJECT
+  GENERAL
+  ACHIEVEMENT
+  ACTIVITY
+}
+
 // ==================== SITE SETTINGS ====================
 
 model SiteSetting {
@@ -288,41 +318,6 @@ model SiteSetting {
   
   @@index([category])
   @@map("site_settings")
-}
-
-// ==================== GALLERY ====================
-
-model GalleryPhoto {
-  id              String        @id @default(cuid())
-  title           String        // Photo title/description
-  googleDriveId   String        // Google Drive file ID (e.g., "1a2b3c4d5e6f")
-  googleDriveUrl  String        // Full shareable link
-  thumbnailUrl    String?       // Optional thumbnail URL
-  eventId         String?       // Optional - link to event
-  category        PhotoCategory @default(GENERAL)
-  uploadedDate    DateTime      @default(now())
-  photoDate       DateTime?     // Actual date photo was taken
-  published       Boolean       @default(true)
-  order           Int           @default(0) // For manual ordering
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
-  // Relations
-  event           Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  
-  @@index([eventId])
-  @@index([category])
-  @@index([published])
-  @@index([photoDate])
-  @@map("gallery_photos")
-}
-
-enum PhotoCategory {
-  EVENT           // Photos from specific events
-  GENERAL         // Standalone photos
-  TEAM            // Team photos
-  ACTIVITY        // General activities
-  ACHIEVEMENT     // Awards/achievements
 }
 
 // ==================== AUDIT LOGS ====================

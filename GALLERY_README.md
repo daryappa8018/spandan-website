@@ -1,163 +1,450 @@
-# 📸 Gallery Feature - Google Drive Integration
+# 📸 Photo Gallery System Documentation
 
 ## Overview
-A photo gallery system that uses Google Drive for storage, avoiding Vercel's storage limitations. Photos are stored on Google Drive and only metadata is stored in the database.
 
-## Features
-- ✅ Upload photos via Google Drive links
-- ✅ Categorize photos (Event, General, Team, Activity, Achievement)
-- ✅ Link photos to specific events
-- ✅ Sort by date (earliest first)
-- ✅ Publish/unpublish control
-- ✅ Public gallery page at `/gallery`
-- ✅ Admin management UI at `/admin/gallery`
+This photo gallery system is a **Google Drive-based** unified photo management solution for the Spandan website. All images are stored on Google Drive and accessed via public share links - **no paid cloud storage services required**.
 
-## Storage Strategy
-- **Google Drive**: Stores actual image files (15GB free, unlimited with Google Workspace)
-- **Database**: Stores only metadata (title, category, Drive ID, dates, etc.)
-- **Vercel**: Serves only HTML/API (no file storage used)
+---
 
-## How to Add Photos
+## ✅ What Has Been Implemented
 
-### Step 1: Upload to Google Drive
-1. Upload your photos to Google Drive
-2. Right-click each photo → **Share**
-3. Change permissions to **"Anyone with the link can view"**
-4. Click **Copy link**
+### 1. **Google Drive Integration**
+- **Utility Functions** (`lib/google-drive.ts`)
+  - `getDriveImageUrl()` - Converts Google Drive share links to direct image URLs
+  - `getDriveThumbnail()` - Gets thumbnail URLs for gallery grids (w200/w400/w800)
+  - `extractDriveFileId()` - Extracts file ID from any Drive URL format
+  - `isValidDriveUrl()` - Validates Google Drive URLs
+  
+- **Supported URL Formats:**
+  ```
+  https://drive.google.com/file/d/FILE_ID/view
+  https://drive.google.com/open?id=FILE_ID
+  https://drive.google.com/uc?id=FILE_ID
+  ```
 
-### Step 2: Add to Gallery (Admin Panel)
-1. Go to **Admin Panel** → **Photo Gallery**
-2. Click **"+ Add Photo"**
-3. Fill in the form:
-   - **Title**: Description of the photo
-   - **Google Drive URL**: Paste the shareable link
-   - **Category**: Select appropriate category
-   - **Link to Event**: (Optional) Associate with an event
-   - **Photo Date**: (Optional) Actual date photo was taken
-   - **Publish**: Check to make visible immediately
-4. Click **"Add Photo"**
-
-### Supported URL Formats
-The system automatically extracts Drive file IDs from:
-- `https://drive.google.com/file/d/FILE_ID/view`
-- `https://drive.google.com/open?id=FILE_ID`
-- Just the `FILE_ID` itself
-
-## Database Schema
-
+### 2. **Database Schema** (`prisma/schema.prisma`)
 ```prisma
 model GalleryPhoto {
-  id              String        @id @default(cuid())
-  title           String
-  googleDriveId   String        // Google Drive file ID
-  googleDriveUrl  String        // Direct image URL
-  thumbnailUrl    String?       // Thumbnail URL
-  eventId         String?       // Optional link to event
-  category        PhotoCategory
-  uploadedDate    DateTime      @default(now())
-  photoDate       DateTime?     // Actual photo date
-  published       Boolean       @default(true)
-  order           Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
-  event           Event?
-}
-
-enum PhotoCategory {
-  EVENT
-  GENERAL
-  TEAM
-  ACTIVITY
-  ACHIEVEMENT
+  id            String        @id @default(cuid())
+  driveImageUrl String        // Original Google Drive share link
+  category      PhotoCategory // EVENT, TEAM, PROJECT, GENERAL, ACHIEVEMENT, ACTIVITY
+  referenceId   String?       // Links to event/team/project ID
+  referenceName String?       // Name of linked entity
+  year          Int
+  caption       String?
+  published     Boolean       @default(true)
+  order         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 ```
 
-## API Endpoints
+### 3. **Reusable Components**
 
-### GET `/api/admin/gallery`
-List all gallery photos (admin only)
-- Returns photos with event details
-- Sorted by photoDate (earliest first)
+#### `<PhotoCarousel />` - components/gallery/PhotoCarousel.tsx
+- Full-featured image slideshow
+- Manual navigation (prev/next buttons)
+- Thumbnail navigation strip
+- Photo counter
+- Caption display
+- Keyboard shortcuts ready
+- Mobile responsive
 
-### POST `/api/admin/gallery`
-Create new photo (admin only)
-```json
-{
-  "title": "Blood Donation Camp - Group Photo",
-  "googleDriveId": "1abc...xyz",
-  "googleDriveUrl": "https://drive.google.com/uc?export=view&id=1abc...xyz",
-  "thumbnailUrl": "https://drive.google.com/thumbnail?id=1abc...xyz&sz=w400",
-  "eventId": "clx123...",
-  "category": "EVENT",
-  "photoDate": "2024-11-15",
-  "published": true
+**Usage:**
+```tsx
+import PhotoCarousel from '@/components/gallery/PhotoCarousel';
+
+<PhotoCarousel 
+  photos={photos}
+  autoPlay={false}
+  showCaptions={true}
+/>
+```
+
+#### `<GalleryGrid />` - components/gallery/GalleryGrid.tsx
+- Responsive grid layout (2/3/4 columns)
+- Hover effects
+- Click to open lightbox
+- Lazy loading
+- Thumbnail optimization
+
+**Usage:**
+```tsx
+import GalleryGrid from '@/components/gallery/GalleryGrid';
+
+<GalleryGrid 
+  photos={photos}
+  columns={3}
+  showCaptions={true}
+/>
+```
+
+#### `<PhotoLightbox />` - components/gallery/PhotoLightbox.tsx
+- Full-screen photo viewer
+- Keyboard navigation (Arrow keys, Escape)
+- Click outside to close
+- Photo counter and captions
+
+#### `<GalleryFilters />` - components/gallery/GalleryFilters.tsx
+- Filter by Category
+- Filter by Year
+- Filter by Reference (Event/Team/Project)
+- Client-side filtering (no page reload)
+- Reset all filters button
+
+### 4. **Public Gallery Page** (`app/gallery/page.tsx`)
+- Displays all published photos
+- Multi-filter system
+- Real-time stats
+- Grid view with lightbox
+- Client-side filtering
+
+**URL:** `/gallery`
+
+### 5. **Admin Gallery Management** (`app/admin/gallery/`)
+
+#### Gallery List (`app/admin/gallery/page.tsx`)
+- View all photos (published & unpublished)
+- Filter by category and status
+- Quick publish/unpublish toggle
+- Edit and delete actions
+- Photo count statistics
+
+**URL:** `/admin/gallery`
+
+#### Add New Photo (`app/admin/gallery/new/page.tsx`)
+- Google Drive URL input with validation
+- Category selection
+- Link to Event/Team/Project
+- Year, caption, order
+- Live preview
+- Publish control
+
+**URL:** `/admin/gallery/new`
+
+#### Edit Photo (`app/admin/gallery/[id]/edit/page.tsx`)
+- Update all photo details
+- Change Google Drive URL
+- Update metadata
+- Save changes
+
+**URL:** `/admin/gallery/[photoId]/edit`
+
+### 6. **API Routes**
+
+#### Public API
+- `GET /api/gallery` - Fetch published photos (with filters)
+
+#### Admin API
+- `GET /api/admin/gallery` - Fetch all photos
+- `POST /api/admin/gallery` - Create new photo
+- `GET /api/admin/gallery/[id]` - Get single photo
+- `PUT /api/admin/gallery/[id]` - Update photo
+- `DELETE /api/admin/gallery/[id]` - Delete photo
+
+All admin routes are protected with authentication.
+
+### 7. **Configuration Updates**
+
+#### `next.config.js`
+```javascript
+images: {
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'drive.google.com',
+      pathname: '/**',
+    },
+  ],
 }
 ```
 
-### PATCH `/api/admin/gallery/[id]`
-Update photo metadata (admin only)
+#### Navigation (`lib/types.ts`)
+- Added "Gallery" to main navigation menu
 
-### DELETE `/api/admin/gallery/[id]`
-Delete photo from database (admin only)
-**Note**: This does NOT delete the file from Google Drive
+---
 
-## Public Gallery Page
-- URL: `/gallery`
-- Shows all published photos
-- Grid layout with hover effects
-- Click to view full size on Google Drive
-- Filter by category
-- Shows associated event (if any)
+## 📋 How to Use the System
 
-## Admin Gallery Page
-- URL: `/admin/gallery`
-- Full CRUD operations
-- Category filters
-- Publish/unpublish toggle
-- View/Edit/Delete actions
+### For Admins: Adding Photos
 
-## Important Notes
+1. **Prepare Images on Google Drive**
+   - Upload images to your Google Drive
+   - Right-click → Share → "Anyone with the link can view"
+   - Copy the share link
 
-### Google Drive Permissions
-**CRITICAL**: Photos must be set to "Anyone with the link can view" or they won't display on the public website.
+2. **Add to Gallery**
+   - Go to `/admin/gallery`
+   - Click "Add Photo"
+   - Paste Google Drive URL
+   - Select category
+   - (Optional) Link to Event/Team/Project
+   - Add year and caption
+   - Click "Add Photo"
 
-### File Deletion
-Deleting a photo from the admin panel only removes it from the website database. The actual file remains on Google Drive. To completely remove a photo:
-1. Delete from admin panel
-2. Manually delete from Google Drive
+3. **Manage Photos**
+   - Toggle publish/unpublish status
+   - Edit details
+   - Delete photos
+   - Filter by category/status
 
-### Storage Costs
-- Google Drive: 15GB free, then paid plans
-- Vercel: No storage used ✅
-- Database: ~1KB per photo metadata
+### For Users: Viewing Gallery
 
-### Performance
-- Initial load: Fetches thumbnails (400px width)
-- Full view: Opens Google Drive direct link
-- Fast CDN delivery via Google's infrastructure
+1. Navigate to `/gallery`
+2. Use filters to narrow down photos:
+   - By Category (Event, Team, Project, etc.)
+   - By Year
+   - By specific Event/Team/Project
+3. Click any photo to open full-screen lightbox
+4. Use arrow keys or buttons to navigate
 
-## Future Enhancements (Optional)
-- [ ] Bulk upload (multiple photos at once)
-- [ ] Google Drive Picker integration (select files directly from Drive)
-- [ ] Image optimization/compression before upload
-- [ ] Photo albums/collections
-- [ ] Lightbox gallery view
-- [ ] Download original resolution
+---
 
-## Testing Locally
-1. Ensure `.env.local` has `DATABASE_URL` configured
-2. Run `npx prisma db push` to sync schema
-3. Start dev server: `npm run dev`
-4. Navigate to `/admin/gallery`
-5. Add a test photo using a Google Drive link
+## 🔧 Integration with Existing Pages
 
-## Deployment Checklist
-- [x] Database schema updated
-- [x] API routes created
-- [x] Admin UI implemented
-- [x] Public gallery page created
-- [x] Navigation links added
-- [ ] Test with real photos
-- [ ] Deploy to Vercel
-- [ ] Verify Google Drive URLs work in production
+### Events Page Integration
+
+To add a photo carousel to an event detail page:
+
+```tsx
+// app/events/[slug]/page.tsx
+
+import PhotoCarousel from '@/components/gallery/PhotoCarousel';
+
+// Inside your component
+const eventPhotos = await prisma.galleryPhoto.findMany({
+  where: {
+    category: 'EVENT',
+    referenceId: event.id,
+    published: true,
+  },
+  orderBy: { order: 'asc' },
+});
+
+// In JSX
+{eventPhotos.length > 0 && (
+  <section>
+    <h2>Event Photos</h2>
+    <PhotoCarousel photos={eventPhotos} />
+  </section>
+)}
+```
+
+### Team Page Integration
+
+```tsx
+// app/team/page.tsx
+
+import GalleryGrid from '@/components/gallery/GalleryGrid';
+
+const teamPhotos = await prisma.galleryPhoto.findMany({
+  where: {
+    category: 'TEAM',
+    published: true,
+  },
+  orderBy: [{ year: 'desc' }, { order: 'asc' }],
+});
+
+// In JSX
+<GalleryGrid photos={teamPhotos} columns={4} />
+```
+
+### Tech Projects Integration
+
+```tsx
+// app/tech-projects/[slug]/page.tsx
+
+const projectPhotos = await prisma.galleryPhoto.findMany({
+  where: {
+    category: 'PROJECT',
+    referenceId: project.id,
+    published: true,
+  },
+});
+
+<PhotoCarousel photos={projectPhotos} showCaptions={true} />
+```
+
+---
+
+## ⚙️ Technical Details
+
+### Google Drive Rate Limits
+
+**Important:** Google Drive has rate limits on direct image access. To avoid issues:
+
+1. **Use Thumbnails for Grids**
+   - Always use `getDriveThumbnail()` for gallery grids
+   - Only load full-size images in carousels/lightboxes
+
+2. **Lazy Loading**
+   - Components use Next.js Image lazy loading by default
+   - Images load as they come into viewport
+
+3. **Caching**
+   - Browser caches Google Drive URLs
+   - Set appropriate cache headers if needed
+
+### Performance Optimization
+
+1. **Thumbnails:** Use `getDriveThumbnail(url, 'small'|'medium'|'large')`
+   - Small: 200px (mobile thumbnails)
+   - Medium: 400px (desktop grids)
+   - Large: 800px (carousels)
+
+2. **Unoptimized Images:**
+   - Google Drive images use `unoptimized={true}` in Next.js Image
+   - This prevents Next.js from trying to optimize Drive images
+   - Reduces build time and server load
+
+3. **Client-Side Filtering:**
+   - All gallery filtering happens in the browser
+   - No server round-trips for filter changes
+   - Fast, responsive user experience
+
+### URL Structure
+
+**Google Drive Direct URL:**
+```
+https://drive.google.com/uc?id=FILE_ID
+```
+
+**Google Drive Thumbnail URL:**
+```
+https://drive.google.com/thumbnail?id=FILE_ID&sz=w400
+```
+
+### Security
+
+- Admin routes protected with NextAuth
+- All photo mutations logged in audit logs
+- Public API only serves published photos
+- Google Drive permissions handled by Drive sharing settings
+
+---
+
+## 🎨 Customization
+
+### Styling
+
+All components use Tailwind CSS and can be customized:
+
+```tsx
+<GalleryGrid 
+  photos={photos}
+  columns={3}
+  className="custom-class"  // Add custom styles
+/>
+```
+
+### Adding New Categories
+
+1. Update `PhotoCategory` enum in `prisma/schema.prisma`
+2. Run `npx prisma generate && npx prisma db push`
+3. Update form dropdowns in admin pages
+
+### Changing Grid Layout
+
+```tsx
+<GalleryGrid columns={4} />  // 4 columns
+<GalleryGrid columns={3} />  // 3 columns (default)
+<GalleryGrid columns={2} />  // 2 columns
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### "Failed to load image" Error
+
+**Cause:** Image not publicly shared on Google Drive
+
+**Solution:**
+1. Open the Drive file
+2. Click Share → Change to "Anyone with the link"
+3. Ensure permission is "Viewer"
+
+### Invalid URL Error
+
+**Cause:** Wrong URL format
+
+**Solution:** Use the full shareable link from Google Drive:
+```
+✅ https://drive.google.com/file/d/ABC123.../view
+❌ https://drive.google.com/drive/folders/...
+```
+
+### Images Not Loading in Gallery
+
+**Cause:** Photos not marked as published
+
+**Solution:** Go to `/admin/gallery` and toggle "Published" status
+
+### Slow Loading
+
+**Cause:** Using full-size images in grids
+
+**Solution:** System automatically uses thumbnails, but verify:
+```tsx
+// In GalleryGrid component
+getDriveThumbnail(photo.driveImageUrl, 'medium')
+```
+
+---
+
+## 📊 Database Migration
+
+Run these commands to apply the photo schema:
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push
+
+# (Optional) Seed with sample photos
+# Add seed data to prisma/seed.ts first
+npm run db:seed
+```
+
+---
+
+## 🚀 Deployment Checklist
+
+- [ ] Run `npx prisma generate`
+- [ ] Verify `next.config.js` has Google Drive in `remotePatterns`
+- [ ] Test photo upload in admin panel
+- [ ] Verify public gallery loads correctly
+- [ ] Check mobile responsiveness
+- [ ] Test filters and lightbox
+- [ ] Ensure admin authentication works
+
+---
+
+## 📝 Future Enhancements (Optional)
+
+1. **Bulk Upload:** Upload multiple photos at once
+2. **Auto-Tagging:** AI-based photo categorization
+3. **Download Feature:** Allow users to download photos
+4. **Photo Comments:** Let users comment on photos
+5. **Social Sharing:** Share individual photos on social media
+6. **Albums:** Group photos into custom albums
+7. **Search:** Full-text search in captions
+
+---
+
+## 🆘 Support
+
+For issues or questions:
+1. Check this documentation
+2. Review component source code
+3. Check browser console for errors
+4. Verify Google Drive sharing permissions
+5. Contact development team
+
+---
+
+**System Version:** 1.0  
+**Last Updated:** January 2026  
+**Maintained By:** Spandan Development Team

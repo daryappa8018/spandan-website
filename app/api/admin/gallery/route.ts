@@ -1,40 +1,44 @@
 // app/api/admin/gallery/route.ts
-// Gallery management API - List and create photos
+// Admin API for managing gallery photos
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isValidDriveUrl } from '@/lib/google-drive';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/admin/gallery - List all photos
+// GET all photos (admin view - includes unpublished)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const published = searchParams.get('published');
+
+    const where: any = {};
+    if (category && category !== 'all') where.category = category;
+    if (published !== null && published !== 'all') {
+      where.published = published === 'true';
+    }
+
     const photos = await prisma.galleryPhoto.findMany({
-      include: {
-        event: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
+      where,
       orderBy: [
-        { photoDate: 'asc' }, // Earliest first
-        { uploadedDate: 'asc' },
+        { year: 'desc' },
+        { order: 'asc' },
+        { createdAt: 'desc' },
       ],
     });
 
-    return NextResponse.json({ photos });
+    return NextResponse.json({ photos }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching gallery photos:', error);
+    console.error('Admin gallery fetch error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch photos' },
       { status: 500 }
@@ -42,21 +46,45 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/gallery - Create new photo
+// POST - Create new photo
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
+    const {
+      driveImageUrl,
+      category,
+      referenceId,
+      referenceName,
+      year,
+      caption,
+      published,
+      order,
+    } = body;
 
-    // Validate required fields
-    if (!body.title || !body.googleDriveId || !body.googleDriveUrl) {
+    // Validation
+    if (!driveImageUrl || !category || !year) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: driveImageUrl, category, year' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidDriveUrl(driveImageUrl)) {
+      return NextResponse.json(
+        { error: 'Invalid Google Drive URL' },
+        { status: 400 }
+      );
+    }
+
+    const validCategories = ['EVENT', 'TEAM', 'PROJECT', 'GENERAL', 'ACHIEVEMENT', 'ACTIVITY'];
+    if (!validCategories.includes(category)) {
+      return NextResponse.json(
+        { error: 'Invalid category' },
         { status: 400 }
       );
     }
@@ -64,28 +92,31 @@ export async function POST(request: NextRequest) {
     // Create photo
     const photo = await prisma.galleryPhoto.create({
       data: {
-        title: body.title,
-        googleDriveId: body.googleDriveId,
-        googleDriveUrl: body.googleDriveUrl,
-        thumbnailUrl: body.thumbnailUrl || null,
-        eventId: body.eventId || null,
-        category: body.category || 'GENERAL',
-        photoDate: body.photoDate ? new Date(body.photoDate) : null,
-        published: body.published ?? true,
-        order: body.order ?? 0,
+        driveImageUrl,
+        category,
+        referenceId: referenceId || null,
+        referenceName: referenceName || null,
+        year: parseInt(year),
+        caption: caption || null,
+        published: published !== false,
+        order: order || 0,
       },
-      include: {
-        event: {
-          select: {
-            title: true,
-          },
-        },
+    });
+
+    // Log audit
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: 'CREATE',
+        entity: 'gallery_photos',
+        entityId: photo.id,
+        changes: JSON.stringify({ created: photo }),
       },
     });
 
     return NextResponse.json({ photo }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating photo:', error);
+    console.error('Photo creation error:', error);
     return NextResponse.json(
       { error: 'Failed to create photo' },
       { status: 500 }
