@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import PhotoCarousel from '@/components/gallery/PhotoCarousel';
 
 // Make this a dynamic route - don't prerender at build time
 export const dynamic = 'force-dynamic';
@@ -50,6 +51,16 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   if (!event) {
     notFound();
   }
+
+  // Fetch photos for this event
+  const eventPhotos = await prisma.galleryPhoto.findMany({
+    where: {
+      category: 'EVENT',
+      referenceId: event.id,
+      published: true,
+    },
+    orderBy: { order: 'asc' },
+  });
 
   const hasDetails = !!event.details;
 
@@ -238,6 +249,18 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               </div>
             </div>
           </section>
+
+          {/* Event Photos */}
+          {eventPhotos.length > 0 && (
+            <section className="border-t border-slate-200 py-12">
+              <div className="max-w-6xl mx-auto px-6">
+                <div className="max-w-3xl">
+                  <h2 className="text-xl font-semibold text-slate-900 mb-6">Event Photos</h2>
+                  <PhotoCarousel photos={eventPhotos} showCaptions={true} />
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Partners & Documentation */}
           {(event.details.partners.length > 0 || event.details.photosNote || event.details.dataNote) && (

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Metadata } from 'next';
+import PhotoCarousel from '@/components/gallery/PhotoCarousel';
 
 export const metadata: Metadata = {
   title: 'Spandan - Socio-Technical Club',
@@ -18,6 +19,16 @@ export default async function HomePage() {
     take: 3,
     orderBy: { createdAt: 'desc' },
     include: { metrics: true },
+  });
+
+  // Fetch featured photos
+  const featuredPhotos = await prisma.galleryPhoto.findMany({
+    where: {
+      published: true,
+      category: { in: ['EVENT', 'ACHIEVEMENT', 'ACTIVITY'] },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 8,
   });
 
   // Fetch settings
@@ -88,6 +99,23 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Photos */}
+      {featuredPhotos.length > 0 && (
+        <section className="border-t border-slate-200 bg-slate-50 py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="text-xl font-semibold text-slate-900 mb-8">Recent Highlights</h2>
+            <div className="max-w-4xl mx-auto">
+              <PhotoCarousel photos={featuredPhotos} showCaptions={true} />
+              <div className="text-center mt-6">
+                <a href="/gallery" className="text-sm text-[#3d3e65] underline hover:text-slate-900">
+                  View full gallery →
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Recent Activities - Timeline style, from database */}
       <section className="max-w-6xl mx-auto px-6 py-16">

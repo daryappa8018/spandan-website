@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Metadata } from 'next';
+import PhotoCarousel from '@/components/gallery/PhotoCarousel';
 
 export const metadata: Metadata = {
   title: 'Team | Spandan',
@@ -25,6 +26,16 @@ export default async function TeamPage() {
   const teamMembers = await prisma.teamMember.findMany({
     where: { published: true },
     orderBy: [{ category: 'asc' }, { order: 'asc' }],
+  });
+
+  // Fetch team photos
+  const teamPhotos = await prisma.galleryPhoto.findMany({
+    where: {
+      category: 'TEAM',
+      published: true,
+    },
+    orderBy: [{ year: 'desc' }, { order: 'asc' }],
+    take: 12,
   });
 
   const membersByCategory = teamMembers.reduce((acc, member) => {
@@ -110,6 +121,23 @@ export default async function TeamPage() {
           );
         })}
       </div>
+
+      {/* Team Photos */}
+      {teamPhotos.length > 0 && (
+        <section className="border-t border-slate-200 bg-slate-50 py-12">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="max-w-4xl">
+              <h2 className="text-xl font-semibold text-slate-900 mb-6">Team Moments</h2>
+              <PhotoCarousel photos={teamPhotos} showCaptions={true} />
+              <div className="text-center mt-6">
+                <a href="/gallery?category=TEAM" className="text-sm text-[#3d3e65] underline hover:text-slate-900">
+                  View all team photos in gallery →
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Volunteers Note */}
       <section className="max-w-6xl mx-auto px-6 pb-16">
