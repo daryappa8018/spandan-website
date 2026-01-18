@@ -17,6 +17,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: '📊' },
     { name: 'Events', href: '/admin/events', icon: '📅' },
+    { name: 'Gallery', href: '/admin/gallery', icon: '📸' },
     { name: 'Team', href: '/admin/team', icon: '👥' },
     { name: 'Tech Projects', href: '/admin/projects', icon: '💻' },
     { name: 'Impact Data', href: '/admin/impact', icon: '📈' },
@@ -88,6 +89,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 className="block text-sm text-[#3d3e65] hover:underline"
               >
                 + New Event
+              </a>
+              <a
+                href="/admin/gallery/new"
+                className="block text-sm text-[#3d3e65] hover:underline"
+              >
+                + Add Photo
               </a>
               <a
                 href="/admin/team/new"
